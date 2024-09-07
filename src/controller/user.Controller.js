@@ -31,15 +31,12 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         phone,
-        address
+        address,
+        role
     } = req.body
 
 
-    if (
-        [name, email, password, phone, address].some((field) => field?.trim() === "")
-    ) {
-        throw new ApiError(400, "All the fields are required")
-    }
+
     const checkUser = await User.findOne({ email })
     if (checkUser) {
         throw new ApiError(409, "User already found")
@@ -51,7 +48,8 @@ const registerUser = asyncHandler(async (req, res) => {
             email: email,
             password: password,
             phone: phone,
-            address: address
+            address: address,
+            role: role || "user"
         })
 
 
@@ -118,14 +116,10 @@ const logInUser = asyncHandler(async (req, res) => {
                 200,
                 {
                     user: logInUser, accessToken, refreshToken
-
                 },
-                "user login succesfully"
+                "user logOut succesfully"
             )
         )
-
-
-
 
 
 
@@ -134,7 +128,35 @@ const logInUser = asyncHandler(async (req, res) => {
 
 
 
-const logOutUser = asyncHandler((req, res) => {
+const logOutUser = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+        .status(200)
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .json(
+            new ApiResponse(
+                200,
+
+                "user login succesfully"
+            )
+        )
+
+
 
 })
 

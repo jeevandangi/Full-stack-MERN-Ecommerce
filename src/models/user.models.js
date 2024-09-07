@@ -26,9 +26,13 @@ const userSchema = new mongoose.Schema({
         required: true
 
     },
+    role: {
+        type: String,
+        enum: ["user", "admin", "superAdmin"],
+        default: "user"
+    },
     refToken: {
         type: String,
-
     }
 }, {
     timestamps: true
